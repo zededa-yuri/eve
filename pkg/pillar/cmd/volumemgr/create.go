@@ -11,6 +11,7 @@ import (
 	"github.com/lf-edge/edge-containers/pkg/registry"
 	"github.com/lf-edge/eve/pkg/pillar/cas"
 	"github.com/lf-edge/eve/pkg/pillar/diskmetrics"
+	"github.com/lf-edge/eve/pkg/pillar/tgt"
 	"github.com/lf-edge/eve/pkg/pillar/types"
 	"github.com/lf-edge/eve/pkg/pillar/zfs"
 )
@@ -192,6 +193,18 @@ func destroyVdiskVolume(ctx *volumemgrContext, status types.VolumeStatus) (bool,
 		return created, "", errors.New(errStr)
 	}
 	if info.Mode()&os.ModeDevice != 0 {
+		if err := tgt.VHostDeleteIBlock(status.Key(), status.WWN); err != nil {
+			errStr := fmt.Sprintf("Error deleting vhost for %s, error=%v",
+				status.Key(), err)
+			log.Error(errStr)
+			return created, "", errors.New(errStr)
+		}
+		if err := tgt.TargetDeleteIBlock(status.Key()); err != nil {
+			errStr := fmt.Sprintf("Error deleting target for %s, error=%v",
+				status.Key(), err)
+			log.Error(errStr)
+			return created, "", errors.New(errStr)
+		}
 		//Assume this is zfs device
 		zVolName := status.ZVolName(types.VolumeZFSPool)
 		if stdoutStderr, err := zfs.DestroyDataset(log, zVolName); err != nil {

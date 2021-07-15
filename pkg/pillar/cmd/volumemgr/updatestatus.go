@@ -9,6 +9,7 @@ import (
 	"time"
 
 	zconfig "github.com/lf-edge/eve/api/go/config"
+	"github.com/lf-edge/eve/pkg/pillar/tgt"
 	"github.com/lf-edge/eve/pkg/pillar/types"
 	"github.com/lf-edge/eve/pkg/pillar/utils"
 	"github.com/lf-edge/eve/pkg/pillar/vault"
@@ -518,6 +519,29 @@ func doUpdateVol(ctx *volumemgrContext, status *types.VolumeStatus) (bool, bool)
 			if ctx.persistType == types.PersistZFS && !status.IsContainer() {
 				zVolStatus := lookupZVolStatusByDataset(ctx, status.ZVolName(types.VolumeZFSPool))
 				if zVolStatus != nil {
+					serial := tgt.GenerateNaaSerial()
+					wwn := fmt.Sprintf("naa.%s", serial)
+					err := tgt.TargetCreateIBlock(zVolStatus.Device, status.Key(), serial)
+					if err != nil {
+						log.Errorf("doUpdateVol(%s) name %s: TargetCreateFileIODev: %v",
+							status.Key(), status.DisplayName, err)
+						errStr := fmt.Sprintf("TargetCreateFileIODev volume %s: %v",
+							status.DisplayName, err)
+						status.SetErrorWithSource(errStr, types.VolumeStatus{}, time.Now())
+						changed = true
+						return changed, false
+					}
+					err = tgt.VHostCreateIBlock(status.Key(), wwn)
+					if err != nil {
+						log.Errorf("doUpdateVol(%s) name %s: VHostCreateFileIODev: %v",
+							status.Key(), status.DisplayName, err)
+						errStr := fmt.Sprintf("VHostCreateFileIODev volume %s: %v",
+							status.DisplayName, err)
+						status.SetErrorWithSource(errStr, types.VolumeStatus{}, time.Now())
+						changed = true
+						return changed, false
+					}
+					status.WWN = wwn
 					status.SubState = types.VolumeSubStatePrepareDone
 					changed = true
 				}
