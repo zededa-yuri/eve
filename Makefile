@@ -364,7 +364,7 @@ run-installer-raw: $(BIOS_IMG) $(DEVICETREE_DTB)
 	$(QEMU_SYSTEM) -drive file=$(TARGET_IMG),format=$(IMG_FORMAT) -drive file=$(INSTALLER).raw,format=raw $(QEMU_OPTS)
 
 run-installer-net: QEMU_TFTP_OPTS=,tftp=$(dir $(IPXE_IMG)),bootfile=$(notdir $(IPXE_IMG))
-run-installer-net: $(BIOS_IMG) $(IPXE_IMG) $(DEVICETREE_DTB)
+run-installer-net: $(BIOS_IMG) $(IPXE_IMG) $(DEVICETREE_DTB) current
 	tar -C $(INSTALLER) -xvf $(INSTALLER).net || :
 	qemu-img create -f ${IMG_FORMAT} $(TARGET_IMG) ${MEDIA_SIZE}M
 	$(QEMU_SYSTEM) -drive file=$(TARGET_IMG),format=$(IMG_FORMAT) $(QEMU_OPTS)
