@@ -10,6 +10,7 @@ import (
 	"github.com/lf-edge/eve/pkg/pillar/flextimer"
 	"github.com/lf-edge/eve/pkg/pillar/types"
 	"github.com/shirou/gopsutil/cpu"
+	"github.com/sirupsen/logrus"
 )
 
 // Run a periodic post of the metrics
@@ -70,8 +71,18 @@ func getAndPublishMetrics(ctx *domainContext, hyper hypervisor.Hypervisor) {
 			// We clear the memory so it doesn't accidentally get
 			// reported.  We keep the CPUTotal and AvailableMemory
 			dm.UsedMemory = 0
+			dm.MaxUsedMemory = 0
+			status.MaxUsedMemory = 0
 			dm.UsedMemoryPercent = 0
 		}
+
+		if dm.MaxUsedMemory > status.MaxUsedMemory {
+			logrus.Infof("Curr maximum used memory %d, setting to %d\n", dm.MaxUsedMemory,
+				status.MaxUsedMemory)
+			status.MaxUsedMemory = dm.MaxUsedMemory
+			logrus.Infof("New maximum used memory %d\n", status.MaxUsedMemory)
+		}
+
 		dm.LastHeard = now
 		ctx.pubDomainMetric.Publish(dm.Key(), dm)
 	}

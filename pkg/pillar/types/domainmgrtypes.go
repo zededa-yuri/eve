@@ -257,6 +257,8 @@ type DomainStatus struct {
 	VncDisplay         uint32
 	VncPasswd          string
 	TriedCount         int
+	MaxUsedMemory      uint32
+
 	// ErrorAndTime provides SetErrorNow() and ClearError()
 	ErrorAndTime
 	BootFailed     bool
@@ -393,6 +395,7 @@ type DomainMetric struct {
 	UUIDandVersion    UUIDandVersion
 	CPUTotal          uint64 // Seconds since Domain boot
 	UsedMemory        uint32
+	MaxUsedMemory     uint32
 	AvailableMemory   uint32
 	UsedMemoryPercent float64
 	LastHeard         time.Time
