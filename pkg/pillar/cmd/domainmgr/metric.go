@@ -71,14 +71,15 @@ func getAndPublishMetrics(ctx *domainContext, hyper hypervisor.Hypervisor) {
 			// We clear the memory so it doesn't accidentally get
 			// reported.  We keep the CPUTotal and AvailableMemory
 			dm.UsedMemory = 0
-			dm.MaxUsedMemory = 0
-			status.MaxUsedMemory = 0
+			// dm.MaxUsedMemory = 0
+			// status.MaxUsedMemory = 0
 			dm.UsedMemoryPercent = 0
 		}
 
+		logrus.Infof("1111 status \n")
 		if dm.MaxUsedMemory > status.MaxUsedMemory {
-			logrus.Infof("Curr maximum used memory %d, setting to %d\n", dm.MaxUsedMemory,
-				status.MaxUsedMemory)
+			logrus.Infof("---Curr maximum used memory %v, setting to %v\n",
+				status.MaxUsedMemory, dm.MaxUsedMemory)
 			status.MaxUsedMemory = dm.MaxUsedMemory
 			logrus.Infof("New maximum used memory %d\n", status.MaxUsedMemory)
 		}

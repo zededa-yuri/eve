@@ -827,6 +827,8 @@ func verifyStatus(ctx *domainContext, status *types.DomainStatus) {
 		configActivate = true
 	}
 
+	logrus.Infof("veryfyStatus's perspective  maxusedmemory is  %d\n", status.MaxUsedMemory)
+
 	domainID, domainStatus, err := hyper.Task(status).Info(status.DomainName)
 	if err != nil || domainStatus == types.HALTED {
 		if status.Activated && configActivate {
