@@ -96,7 +96,10 @@ fi
 if P3=$(findfs PARTLABEL=P3) && [ -n "$P3" ]; then
     # Loading zfs modules to see if we have any zpools attached to the system
     # We will unload them later (if they do unload it meands we didn't find zpools)
-    modprobe zfs $STORAGE_ZFS_MODULE_OPTS
+    if ! modprobe zfs $STORAGE_ZFS_MODULE_OPTS; then
+	echo "Failed to load zfs with parameters, falling back to default"
+	modprobe zfs
+    fi
 
     P3_FS_TYPE=$(blkid "$P3"| tr ' ' '\012' | awk -F= '/^TYPE/{print $2;}' | sed 's/"//g')
     echo "$(date -Ins -u) Using $P3 (formatted with $P3_FS_TYPE), for $PERSISTDIR"
@@ -160,7 +163,11 @@ if P3=$(findfs PARTLABEL=P3) && [ -n "$P3" ]; then
     rmmod $(lsmod | grep zfs | awk '{print $1;}') || :
 else
   #in case of no P3 we may have EVE persist on another disks
-  modprobe zfs $STORAGE_ZFS_MODULE_OPTS
+    if ! modprobe zfs $STORAGE_ZFS_MODULE_OPTS; then
+	echo "Failed to load zfs with parameters, falling back to default"
+	modprobe zfs
+    fi
+
   if chroot /hostfs zpool import -f persist; then
     echo "zfs" > /run/eve.persist_type
   else
