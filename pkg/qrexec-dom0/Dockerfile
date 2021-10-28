@@ -1,5 +1,5 @@
-FROM XENTOOLS_TAG as xentools
-FROM QREXECLIB_TAG as qrexec_lib
+FROM lfedge/eve-xen-tools:54ac2c0862a3befaff782766f65c5e5e47d00d05 as xentools
+FROM lfedge/eve-qrexec-lib:4cff59cd356f162dc407313a0190362de6f690c7 as qrexec_lib
 FROM lfedge/eve-alpine:6.7.0 as build
 ENV BUILD_PKGS gcc make libc-dev linux-headers git pkgconf
 RUN eve-alpine-deploy.sh
@@ -13,7 +13,7 @@ RUN mkdir -p /out/usr/bin
 
 WORKDIR /qubes-core-qrexec/daemon
 
-RUN sed -i. -e 's#-Wall##' -e 's#-Wextra##' -e 's#-Werror##'  `find . -name Makefile` 
+RUN sed -i. -e 's#-Wall##' -e 's#-Wextra##' -e 's#-Werror##'  `find . -name Makefile`
 RUN make BACKEND_VMM=xen
 RUN cp qrexec-daemon qrexec-client /out/usr/bin
 
