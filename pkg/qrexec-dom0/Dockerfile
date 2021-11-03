@@ -1,4 +1,4 @@
-FROM lfedge/eve-xen-tools:54ac2c0862a3befaff782766f65c5e5e47d00d05 as xentools
+FROM lfedge/eve-xen-tools:fdae25a5329c031f597676ff99ff7fb754c66292 as xentools
 FROM lfedge/eve-qrexec-lib:4cff59cd356f162dc407313a0190362de6f690c7 as qrexec_lib
 FROM lfedge/eve-alpine:6.7.0 as build
 ENV BUILD_PKGS gcc make libc-dev linux-headers git pkgconf
