@@ -41,3 +41,4 @@ else
    echo "No hypervisor support detected, feel free to run bare-metal containers"
 
 fi
+# small change for test PR 2
