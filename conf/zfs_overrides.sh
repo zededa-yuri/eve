@@ -1,6 +1,31 @@
 #!/bin/sh
 
-module_path=/tmp/modules/zfs-test/extra
+zfs_tuned=0
+
+mount_path=/tmp/modules
+
+if [ "${zfs_tuned}" = "1" ]; then
+    module_path="${mount_path}"/standart_zfs/extra
+else
+    module_path="${mount_path}"/standart_zfs/extra
+fi
+
+zfs_params() {
+    if [ "${zfs_tuned}" = "1" ]; then
+        echo "$(zfs_tuned_params)"
+    else
+        echo ""
+    fi
+
+}
+
+mount_modules_override() {
+    mkdir -p "${mount_path}" || return 1
+    if ! mount /dev/sdc "${mount_path}"; then
+	echo "Failed mounting modules overrides"
+	return 1
+    fi
+}
 
 zfs_dump_params() {
     params="zfs_compressed_arc_enabled \
@@ -49,7 +74,7 @@ zfs_insmod() {
 	fi
     done
 
-    if ! insmod "${module_path}/zfs/zfs.ko" "$(zfs_tuned_params)"; then
+    if ! insmod "${module_path}/zfs/zfs.ko" "$(zfs_params)"; then
 	echo "failed to load zfs module"
 	return 1
     fi
@@ -111,4 +136,10 @@ zfs_vdev_async_write_max_active=10 \
     echo "${zfs_options}"
 #    zfs_dump_params
 
+}
+
+zfs_module_load_override() {
+    mount_modules_override || return 1
+    sleep 3
+    zfs_insmod || return 1
 }

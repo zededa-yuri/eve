@@ -10,20 +10,6 @@ SMART_DETAILS_FILE=$PERSISTDIR/SMART_details.json
 SMART_DETAILS_PREVIOUS_FILE=$PERSISTDIR/SMART_details_previous.json
 
 ZFS_OVERRIDES_PATH="${CONFIGDIR}"/zfs_overrides.sh
-if [ -f "${ZFS_OVERRIDES_PATH}" ]; then
-    source "${ZFS_OVERRIDES_PATH}" || :
-fi
-
-zfs_module_load() {
-    if ! zfs_module_load_override; then
-	echo "failed to execute zfs_module_load_override, fallinback to default"
-	modprobe zfs
-    fi
-}
-
-zfs_module_unload() {
-    rmmod $(lsmod | grep zfs | awk '{print $1;}') || :
-}
 
 # the following is here just for compatibility reasons and it should go away soon
 ln -s "$CONFIGDIR" "/var/$CONFIGDIR"
@@ -39,6 +25,25 @@ if CONFIG=$(findfs PARTLABEL=CONFIG) && [ -n "$CONFIG" ]; then
 else
     echo "$(date -Ins -u) No separate $CONFIGDIR partition"
 fi
+
+if [ -f "${ZFS_OVERRIDES_PATH}" ]; then
+    if source "${ZFS_OVERRIDES_PATH}"; then
+	echo "Loaded ${ZFS_OVERRIDES_PATH}"
+    else
+	echo "Failed sourcing ${ZFS_OVERRIDES_PATH}"
+    fi
+fi
+
+zfs_module_load() {
+    if ! zfs_module_load_override; then
+	echo "failed to execute zfs_module_load_override, fallinback to default"
+	modprobe zfs
+    fi
+}
+
+zfs_module_unload() {
+    rmmod $(lsmod | grep zfs | awk '{print $1;}') || :
+}
 
 INIT_FS=0
 P3_FS_TYPE_DEFAULT=ext4
