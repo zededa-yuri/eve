@@ -3,18 +3,27 @@
 # Copyright (c) 2018 Zededa, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-zfs_module_load() {
-    modprobe zfs
-}
-
-zfs_module_unload() {
-    rmmod $(lsmod | grep zfs | awk '{print $1;}') || :
-}
 
 PERSISTDIR=/persist
 CONFIGDIR=/config
 SMART_DETAILS_FILE=$PERSISTDIR/SMART_details.json
 SMART_DETAILS_PREVIOUS_FILE=$PERSISTDIR/SMART_details_previous.json
+
+ZFS_OVERRIDES_PATH="${CONFIGDIR}"/zfs_overrides.sh
+if [ -f "${ZFS_OVERRIDES_PATH}" ]; then
+    source "${ZFS_OVERRIDES_PATH}" || :
+fi
+
+zfs_module_load() {
+    if ! zfs_module_load_override; then
+	echo "failed to execute zfs_module_load_override, fallinback to default"
+	modprobe zfs
+    fi
+}
+
+zfs_module_unload() {
+    rmmod $(lsmod | grep zfs | awk '{print $1;}') || :
+}
 
 # the following is here just for compatibility reasons and it should go away soon
 ln -s "$CONFIGDIR" "/var/$CONFIGDIR"
