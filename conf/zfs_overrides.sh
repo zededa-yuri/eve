@@ -139,7 +139,9 @@ zfs_vdev_async_write_max_active=10 \
 }
 
 zfs_module_load_override() {
+    echo "------ Executing zfs module overrides ------"
     mount_modules_override || return 1
     sleep 3
     zfs_insmod || return 1
+    echo "------ Overrides executed successfuly ------"
 }

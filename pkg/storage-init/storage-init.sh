@@ -26,12 +26,15 @@ else
     echo "$(date -Ins -u) No separate $CONFIGDIR partition"
 fi
 
+sleep 2
 if [ -f "${ZFS_OVERRIDES_PATH}" ]; then
     if source "${ZFS_OVERRIDES_PATH}"; then
 	echo "Loaded ${ZFS_OVERRIDES_PATH}"
     else
 	echo "Failed sourcing ${ZFS_OVERRIDES_PATH}"
     fi
+else
+    echo "ZFS override not found: ${ZFS_OVERRIDES_PATH}"
 fi
 
 zfs_module_load() {
