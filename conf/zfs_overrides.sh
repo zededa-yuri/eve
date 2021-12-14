@@ -1,11 +1,11 @@
 #!/bin/sh
 
-zfs_tuned=0
+zfs_tuned=1
 
 mount_path=/tmp/modules
 
 if [ "${zfs_tuned}" = "1" ]; then
-    module_path="${mount_path}"/standart_zfs/extra
+    module_path="${mount_path}"/tuned_zfs/extra
 else
     module_path="${mount_path}"/standart_zfs/extra
 fi
@@ -57,9 +57,13 @@ zfs_vdev_async_write_max_active \
 	params="${params}" "${new_params}"
     fi
 
+    echo "-- Module params --"
     for opt in ${params}; do
 	printf "%45s: %d\n" "${opt}" "$(cat /sys/module/zfs/parameters/"${opt}")"
     done
+
+    echo "-- Zvol params --"
+    zfs get volblocksize,compression,primarycache,logbias,redundant_metadata persist/volumes/59b98be5-cca7-4a62-b36b-8ab35b69b1a9.0
 }
 
 zfs_insmod() {
@@ -127,11 +131,9 @@ zfs_vdev_async_read_min_active=1 \
 zfs_vdev_async_read_max_active=10 \
 zfs_vdev_async_write_min_active=1 \
 zfs_vdev_async_write_max_active=10 \
-\
+zfs_smoothing_scale=50000 \
+zfs_write_smoothing=5 \
 "
-# zfs_smoothing_scale=50000 \
-# zfs_write_smoothing=5 \
-# "
 
     echo "${zfs_options}"
 #    zfs_dump_params
@@ -143,5 +145,32 @@ zfs_module_load_override() {
     mount_modules_override || return 1
     sleep 3
     zfs_insmod || return 1
+
+    lsmod | grep zfs
     echo "------ Overrides executed successfuly ------"
+}
+
+
+zfs_free_vhost() {
+    wwpn="$(grep -A 4 vhost-disk1 /run/domainmgr/xen/xen1.cfg)" || exit 1
+    wwpn="$(echo "${wwpn}" | grep wwpn)" || exit 1
+    wwpn="$(echo "${wwpn}" | awk -F "=" '{/wwpn/; gsub(/"/, "", $2); gsub(" ", "" ,$2); print $2}')" || exit 1
+
+    echo "${wwpn}"
+
+    rm /sys/kernel/config/target/vhost/"${wwpn}"/tpgt_1/lun/lun_0/iblock || exit 1
+    rmdir /sys/kernel/config/target/vhost/"${wwpn}"/tpgt_1/lun/lun_0 || exit 1
+    rmdir /sys/kernel/config/target/core/iblock_0/59b98be5-cca7-4a62-b36b-8ab35b69b1a9#0 || exit 1
+    zfs destroy persist/volumes/59b98be5-cca7-4a62-b36b-8ab35b69b1a9.0 || exit 1
+}
+
+zfs_create_zvol_tuned() {
+    zfs create -p -V 200G \
+	-o volmode=dev \
+	-o compression=zstd \
+	-o volblocksize=16k \
+	-o primarycache=metadata \
+	-o logbias=throughput \
+	-o redundant_metadata=most \
+	persist/volumes/59b98be5-cca7-4a62-b36b-8ab35b69b1a9.0
 }
