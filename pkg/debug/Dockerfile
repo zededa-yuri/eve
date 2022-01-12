@@ -47,6 +47,13 @@ WORKDIR /tmp/hexedit/hexedit-1.5
 RUN curl -L https://github.com/pixel/hexedit/archive/refs/tags/1.5.tar.gz | tar -C .. -xzvf -
 RUN ./autogen.sh && ./configure && make DESTDIR=/out install
 
+# Build kexec-tools
+workdir /tmp/kexec/kexec-tools-2.0.23
+RUN curl -L https://mirrors.edge.kernel.org/pub/linux/utils/kernel/kexec/kexec-tools-2.0.23.tar.gz | tar -C .. -xzvf -
+RUN ./configure && \
+  make && \
+  make DESTDIR=/out install
+
 # tweaking various bit
 WORKDIR /out
 COPY ssh.sh spec.sh ./usr/bin/
