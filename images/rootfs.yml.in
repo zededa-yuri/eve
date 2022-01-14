@@ -15,6 +15,7 @@ init:
 onboot:
    - name: dev-overlay
      image: lfedge/dev-overlay
+     image: DEV_OVERLAY_TAG
    - name: rngd
      image: RNGD_TAG
      command: ["/sbin/rngd", "-1"]
