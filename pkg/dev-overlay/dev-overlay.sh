@@ -1,5 +1,5 @@
 #!/bin/sh
 
 
-echo "------ Hello from dev overlay !!!!! -------"
+echo "------ Hello from dev init process !!!!! -------"
 lsmod

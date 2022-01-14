@@ -1,6 +1,6 @@
-FROM linuxkit/modprobe:v0.5
+FROM scratch
 
 WORKDIR /
 ENTRYPOINT []
-COPY dev-overlay.sh /
+COPY dev-overlay.sh /etc/init.d/000-dev-overlay.sh
 CMD ["/dev-overlay.sh"]
