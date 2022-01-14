@@ -2,3 +2,4 @@
 
 
 echo "------ Hello from dev overlay !!!!! -------"
+lsmod
