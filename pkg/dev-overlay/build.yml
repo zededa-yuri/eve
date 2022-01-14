@@ -1,0 +1,20 @@
+# linuxkit build template
+#
+# Copyright (c) 2022 Zededa, Inc.
+# SPDX-License-Identifier: Apache-2.0
+org: lfedge
+image: eve-dev-overlay
+network: yes
+config:
+  binds:
+    - /:/hostfs
+    - /lib/modules:/lib/modules
+    - /dev:/dev
+    - /run:/run
+    - /var:/var
+    - /persist:/persist:rshared,rbind
+    - /config:/config:rshared,rbind
+    - /containers:/containers:rshared,rbind
+  rootfsPropagation: shared
+  capabilities:
+    - all

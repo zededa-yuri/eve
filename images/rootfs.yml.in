@@ -13,6 +13,8 @@ init:
   - XEN_TAG
   - GPTTOOLS_TAG
 onboot:
+   - name: dev-overlay
+     image: lfedge/dev-overlay
    - name: rngd
      image: RNGD_TAG
      command: ["/sbin/rngd", "-1"]
