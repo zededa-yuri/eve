@@ -2,5 +2,5 @@ FROM scratch
 
 WORKDIR /
 ENTRYPOINT []
-COPY dev-overlay.sh /etc/init.d/000-dev-overlay.sh
+COPY dev-overlay.sh /root/
 CMD ["/dev-overlay.sh"]
