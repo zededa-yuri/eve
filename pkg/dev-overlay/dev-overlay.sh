@@ -1,9 +1,31 @@
 #!/bin/sh
 
 do_pivot_root() {
-    if ! mount /dev/sda2 -t squashfs -o ro /mnt/ro-root; then
+    root_uuid="$(sed -n 's/.*root=PARTUUID=\([0-9a-fA-F-]*\).*/\1/p' < /proc/cmdline)"
+    if ! root_part="$(findfs PARTUUID="${root_uuid}")"; then
+	echo "Failed looking up root partition"
+	return 1
+    fi
+
+    if ! IMGA=$(findfs PARTLABEL=IMGA) || ! IMGB=$(findfs PARTLABEL=IMGB); then
+	echo "Failed looking up image A/B"
+	return 1
+    fi
+
+    if [ "${root_part}" = "${IMGA}" ]; then
+	second_part="${IMGB}"
+    else
+	second_part="${IMGA}"
+    fi
+
+    if ! mount "${root_part}" -t squashfs -o ro /mnt/ro-root; then
         echo "Failed mounting original root at /mnt/ro-root"
         return 1
+    fi
+
+    if ! mount -t ext4 "${second_part}" /mnt/2nd-part; then
+	echo "Failed mounting 2nd-part"
+	return 1
     fi
 
     if ! mount -t overlay -o \
@@ -33,8 +55,9 @@ if ! mount --move /mnt/mnt/2nd-part/ /2nd-part; then
 fi
 
 umount /mnt/mnt
+umount /mnt/sys
 umount /mnt/proc
-umount /mnt/dev/
+umount /mnt/dev
 umount /mnt
 
 exec /sbin/init
@@ -56,6 +79,12 @@ main() {
 	return 1
     fi
 
+    # mount /sys
+    if ! mount -t sysfs none /sys; then
+	echo "Failed mounting /dev"
+	return 1
+    fi
+
     # create a writable fs to then create our mountpoints
     if ! mount -t tmpfs inittemp /mnt; then
 	echo "Failed mounting /mnt"
@@ -64,11 +93,6 @@ main() {
 
     if ! mkdir /mnt/ro-root /mnt/2nd-part /mnt/new-root; then
 	echo "Failed creating temporary mount points"
-	return 1
-    fi
-
-    if ! mount -t ext4 /dev/sda3 /mnt/2nd-part; then
-	echo "Failed mounting 2nd-part"
 	return 1
     fi
 
