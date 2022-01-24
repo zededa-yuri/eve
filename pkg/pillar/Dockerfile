@@ -48,6 +48,9 @@ RUN [ -z "$GOARCH" ] || export CC=$(echo /*-cross/bin/*-gcc) ;\
     make DISTDIR=/out/opt/zededa/bin build
 
 WORKDIR /
+
+RUN CGO_ENABLED=0 go get -ldflags "-s -w -extldflags '-static'" github.com/go-delve/delve/cmd/dlv
+
 COPY patches/* /sys-patches/
 # hadolint ignore=SC1097
 RUN set -e && for patch in /sys-patches/*.patch; do \
@@ -69,6 +72,8 @@ COPY --from=build /out/ /
 COPY --from=gpttools / /
 COPY --from=dnsmasq /usr/sbin/dnsmasq /opt/zededa/bin/dnsmasq
 COPY --from=strongswan / /
+
+COPY --from=build /root/go/bin/dlv /dlv
 
 # We have to make sure configs survive in some location, but they don't pollute
 # the default /config (since that is expected to be an empty mount point)

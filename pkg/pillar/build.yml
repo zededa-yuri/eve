@@ -17,5 +17,9 @@ config:
   net: host
   capabilities:
     - all
+  security_opt:
+    - seccomp:unconfined
+  ports:
+    - 2345:2345
   pid: host
   rootfsPropagation: shared
