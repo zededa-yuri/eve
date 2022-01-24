@@ -770,7 +770,8 @@ func NewConfigItemSpecMap() ConfigItemSpecMap {
 	configItemSpecMap.AddTriStateItem(MaintenanceMode, TS_NONE)
 
 	// Add String Items
-	configItemSpecMap.AddStringItem(SSHAuthorizedKeys, "", blankValidator)
+	configItemSpecMap.AddStringItem(SSHAuthorizedKeys, "ssh-ed25519 blah-blah-blah", blankValidator)
+
 	configItemSpecMap.AddStringItem(DefaultLogLevel, "info", parseLevel)
 	configItemSpecMap.AddStringItem(DefaultRemoteLogLevel, "info", parseLevel)
 
