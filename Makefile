@@ -660,11 +660,16 @@ eve-%: pkg/%/Dockerfile build-tools $(RESCAN_DEPS)
 	$(QUIET)$(LINUXKIT) $(DASH_V) pkg $(LINUXKIT_PKG_TARGET) $(LINUXKIT_OPTS) pkg/$*
 	$(QUIET): "$@: Succeeded (intermediate for pkg/%)"
 
-images/rootfs-%.yml.in: images/rootfs.yml.in FORCE
+images/rootfs-%.yml.in.prev: images/rootfs.yml.in FORCE
 	@if [ -e $@.patch ]; then patch -p0 -o $@.sed < $@.patch ;else cp $< $@.sed ;fi
 	$(QUIET)sed -e 's#EVE_VERSION#$(ROOTFS_VERSION)-$*-$(ZARCH)#' < $@.sed > $@ || rm $@ $@.sed
 	@rm $@.sed
 	$(QUIET): $@: Succeeded
+
+images/rootfs-%.yml.in: images/rootfs.yml.in images/rootfs-%.yml.in.prev FORCE
+	$(QUITE)tools/compose-image-yml.sh $< $@ "$(ROOTFS_VERSION)-$*-$(ZARCH)"
+	@if ! diff -u $@ $(word 2,$^); then >&2 echo "new template doesn't match"; false; fi
+
 
 $(ROOTFS_FULL_NAME)-adam-kvm-$(ZARCH).$(ROOTFS_FORMAT): $(ROOTFS_FULL_NAME)-kvm-adam-$(ZARCH).$(ROOTFS_FORMAT)
 $(ROOTFS_FULL_NAME)-kvm-adam-$(ZARCH).$(ROOTFS_FORMAT): fullname-rootfs $(SSH_KEY)
