@@ -25,7 +25,7 @@ HV=$(HV_DEFAULT)
 # Enable development build (disabled by default)
 DEV=n
 # How large to we want the disk to be in Mb
-MEDIA_SIZE=8192
+MEDIA_SIZE=81920
 # Image type for final disk images
 IMG_FORMAT=qcow2
 # Filesystem type for rootfs image
