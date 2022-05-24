@@ -311,8 +311,8 @@ fi
 # Uncomment the following block if you want storage-init to replace
 # rootfs of service containers with a copy under /persist/services/X
 # each of these is considered to be a proper lowerFS
-# for s in "$PERSISTDIR"/services/* ; do
-#   if [ -d "$s" ]; then
-#      mount --bind "$s" "/containers/services/$(basename "$s")/lower"
-#   fi
-# done
+for s in "$PERSISTDIR"/services/* ; do
+  if [ -d "$s" ]; then
+     mount --bind "$s" "/containers/services/$(basename "$s")/lower"
+  fi
+done
