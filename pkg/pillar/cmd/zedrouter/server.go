@@ -72,6 +72,11 @@ type wwanMetricsHandler struct {
 	ctx *zedrouterContext
 }
 
+// Provides information about available patches for the application
+type AppInfoHandler struct {
+	ctx *zedrouterContext
+}
+
 // KubeconfigFileSizeLimitInBytes holds the maximum expected size of Kubeconfig file received from k3s server appInst.
 // Note: KubeconfigFileSizeLimitInBytes should always be < AppInstMetadataResponseSizeLimitInBytes.
 const KubeconfigFileSizeLimitInBytes = 32768 // 32KB
@@ -115,6 +120,10 @@ func createServer4(ctx *zedrouterContext, bridgeIP string, bridgeName string) er
 
 	wwanMetricsHandler := &wwanMetricsHandler{ctx: ctx}
 	mux.Handle("/eve/v1/wwan/metrics.json", wwanMetricsHandler)
+
+	log.Error("Adding AppInfoHandler")
+	AppInfoHandler := &AppInfoHandler{ctx: ctx}
+	mux.Handle("/eve/v1/app/info.json", AppInfoHandler)
 
 	targetPort := 80
 	subnetStr := "169.254.169.254/32"
@@ -727,6 +736,21 @@ func (hdl wwanMetricsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(resp)
+}
+
+func (hdl AppInfoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.Tracef("wwanAppInfoHandler.ServeHTTP")
+	w.Header().Add("Content-Type", "application/json")
+
+	patch := types.AppPatchesAvailable{
+		FromVersion: "001",
+		ToVersion:   "002",
+	}
+
+	patches := []types.AppPatchesAvailable{patch}
+	resp, _ := json.Marshal(patches)
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
 }

@@ -3508,6 +3508,10 @@ type WwanMetrics struct {
 	Networks []WwanNetworkMetrics `json:"networks"`
 }
 
+type AppInfo struct {
+	Patches []AppPatchesAvailable `json:"PatchesAvailable"`
+}
+
 // LookupNetworkMetrics returns metrics corresponding to the given cellular network.
 func (wm WwanMetrics) LookupNetworkMetrics(logicalLabel string) (WwanNetworkMetrics, bool) {
 	for _, metrics := range wm.Networks {
@@ -3570,6 +3574,11 @@ type WwanNetworkMetrics struct {
 	PhysAddrs    WwanPhysAddrs   `json:"physical-addrs"`
 	PacketStats  WwanPacketStats `json:"packet-stats"`
 	SignalInfo   WwanSignalInfo  `json:"signal-info"`
+}
+
+type AppPatchesAvailable struct {
+	FromVersion string `json:"from-version"`
+	ToVersion   string `json:"to-version"`
 }
 
 // WwanPacketStats contains packet statistics recorded by a cellular modem.
