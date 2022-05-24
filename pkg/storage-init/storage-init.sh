@@ -311,8 +311,12 @@ fi
 # Uncomment the following block if you want storage-init to replace
 # rootfs of service containers with a copy under /persist/services/X
 # each of these is considered to be a proper lowerFS
+# For example:
+#   mkdir /persist/services
+#   cp -r /containers/services/pillar/lower /persist/services/pillar
 for s in "$PERSISTDIR"/services/* ; do
-  if [ -d "$s" ]; then
+    if [ -d "$s" ]; then
+     echo "mounting $s to /containers/services/$(basename $s)/lower"
      mount --bind "$s" "/containers/services/$(basename "$s")/lower"
   fi
 done
