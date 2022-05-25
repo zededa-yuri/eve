@@ -125,6 +125,10 @@ func createServer4(ctx *zedrouterContext, bridgeIP string, bridgeName string) er
 	AppInfoHandler := &AppInfoHandler{ctx: ctx}
 	mux.Handle("/eve/v1/app/info.json", AppInfoHandler)
 
+	log.Error("Adding /eve/app-patches to servemux")
+	patchesHandler := http.FileServer(http.Dir("/persist/app-patches"))
+	mux.Handle("/eve/app-patches/", patchesHandler)
+
 	targetPort := 80
 	subnetStr := "169.254.169.254/32"
 	target := fmt.Sprintf("%s:%d", bridgeIP, targetPort)
