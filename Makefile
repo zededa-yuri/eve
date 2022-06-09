@@ -22,6 +22,8 @@ EVE_SNAPSHOT_VERSION=0.0.0
 PROTO_LANGS=go python
 # Use 'make HV=acrn|xen|kvm' to build ACRN images (AMD64 only), Xen or KVM
 HV=$(HV_DEFAULT)
+# Enable development build (disabled by default)
+DEV=0
 # How large to we want the disk to be in Mb
 MEDIA_SIZE=8192
 # Image type for final disk images
@@ -85,7 +87,9 @@ endif
 
 DOCKER_ARCH_TAG=$(ZARCH)
 
-FULL_VERSION:=$(ROOTFS_VERSION)-$(HV)-$(ZARCH)
+ifeq ($(DEV),1)
+FULL_VERSION:=$(FULL_VERSION)-dev
+endif
 
 # where we store outputs
 DIST=$(CURDIR)/dist/$(ZARCH)
