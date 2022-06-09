@@ -240,6 +240,10 @@ LINUXKIT_PKG_TARGET=build
 RESCAN_DEPS=FORCE
 FORCE_BUILD=--force
 
+YQ=$(BUILDTOOLS_BIN)/yq
+YQ_SOURCE=https://github.com/mikefarah/yq.git
+YQ_VERSION=v4.16.2
+
 # we use the following block to assign correct tag to the Docker registry artifact
 ifeq ($(LINUXKIT_PKG_TARGET),push)
   # only builds from master branch are allowed to be called snapshots
@@ -617,6 +621,18 @@ $(LINUXKIT): | $(GOBUILDER)
 	GO111MODULE=on CGO_ENABLED=0 go build -o /go/bin/linuxkit -mod=vendor . && \
 	cd && \
 	rm -rf /tmp/linuxkit" \
+	$(GOTREE) $(GOMODULE) $(BUILDTOOLS_BIN)
+	$(QUIET): $@: Succeeded
+
+$(YQ): | $(GOBUILDER)
+	$(QUIET)$(DOCKER_GO) \
+	"unset GOFLAGS; rm -rf /tmp/linuxkit && \
+	git clone $(YQ_SOURCE) /tmp/yq && \
+	cd /tmp/yq && \
+	git checkout $(YQ_VERSION) && \
+        go build -o /go/bin/yq . && \
+	cd && \
+	rm -rf /tmp/yq" \
 	$(GOTREE) $(GOMODULE) $(BUILDTOOLS_BIN)
 	$(QUIET): $@: Succeeded
 
