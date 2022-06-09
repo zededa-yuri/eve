@@ -7,13 +7,19 @@ process-image-template() {
     local out_templ_path="$1"
     local eve_version="$2"
 
-    local template
+    local flags
     local -a bits
 
     template="$(basename "${out_templ_path}")"
-    IFS='-' read -r -a bits <<< "${template}"
+
+    # Drop everything before the git hashcode (including the hash)
+    flags="$(sed -r 's/.*[0-9a-fA-F]{8}(.*)/\1/p' <<< ${eve_version})"
+    # Drop dirty flag
+    flags="$(sed -r 's/-dirty[0-9.\-]{18}//g' <<< ${flags})"
+    IFS='-' read -r -a bits <<< "${flags}"
 
     for bit in "${bits[@]}"; do
+	echo "processing bit ${bit}"
 	case "${bit}" in
 	    dev)
 		yq eval -i '(.services[] | select(.name == "pillar").image) |= "PILLAR_DEV_TAG"' "${out_templ_path}"
