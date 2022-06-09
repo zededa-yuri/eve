@@ -751,6 +751,7 @@ func (hdl AppInfoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	patch := types.AppPatchesAvailable{
 		FromVersion: "001",
 		ToVersion:   "002",
+		DownloadURL: "http:/169.254.169.254/eve/app-patches/deadbeaf.bin",
 	}
 
 	patches := []types.AppPatchesAvailable{patch}

@@ -3579,6 +3579,7 @@ type WwanNetworkMetrics struct {
 type AppPatchesAvailable struct {
 	FromVersion string `json:"from-version"`
 	ToVersion   string `json:"to-version"`
+	DownloadURL string `jsone:"download-url"`
 }
 
 // WwanPacketStats contains packet statistics recorded by a cellular modem.
