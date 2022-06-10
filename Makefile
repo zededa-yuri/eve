@@ -23,7 +23,7 @@ PROTO_LANGS=go python
 # Use 'make HV=acrn|xen|kvm' to build ACRN images (AMD64 only), Xen or KVM
 HV=$(HV_DEFAULT)
 # Enable development build (disabled by default)
-DEV=0
+DEV=n
 # How large to we want the disk to be in Mb
 MEDIA_SIZE=8192
 # Image type for final disk images
@@ -681,9 +681,19 @@ endif
 	$(QUIET)$(PARSE_PKGS) $< > $@
 	$(QUIET): $@: Succeeded
 
+
+test-%:
+	@echo $*
+	@echo $(call get_pkg_build_yml,$*)
+
+# If DEV=y and file pkg/my_package/build-dev.yml returns the path to that file.
+# Ortherwise returns pkg/my_package/build.yml.
+get_pkg_build_yml = $(if $(filter y,$(DEV)),$(call get_pkg_build_dev_yml,$1),build.yml)
+get_pkg_build_dev_yml = $(if $(wildcard pkg/$1/build-dev.yml),build-dev.yml,build.yml)
+
 eve-%: pkg/%/Dockerfile build-tools $(RESCAN_DEPS)
 	$(QUIET): "$@: Begin: LINUXKIT_PKG_TARGET=$(LINUXKIT_PKG_TARGET)"
-	$(QUIET)$(LINUXKIT) $(DASH_V) pkg $(LINUXKIT_PKG_TARGET) $(LINUXKIT_OPTS) pkg/$*
+	$(QUIET)$(LINUXKIT) $(DASH_V) pkg $(LINUXKIT_PKG_TARGET) $(LINUXKIT_OPTS) -build-yml $(call get_pkg_build_yml,$*) pkg/$*
 	$(QUIET): "$@: Succeeded (intermediate for pkg/%)"
 
 images/rootfs-%.yml.in.prev: images/rootfs.yml.in FORCE
