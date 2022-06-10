@@ -10,12 +10,10 @@ process-image-template() {
     local flags
     local -a bits
 
-    template="$(basename "${out_templ_path}")"
-
     # Drop everything before the git hashcode (including the hash)
-    flags="$(sed -r 's/.*[0-9a-fA-F]{8}(.*)/\1/p' <<< ${eve_version})"
+    flags="$(sed -r 's/.*[0-9a-fA-F]{8}(.*)/\1/p' <<< "${eve_version}")"
     # Drop dirty flag
-    flags="$(sed -r 's/-dirty[0-9.\-]{18}//g' <<< ${flags})"
+    flags="$(sed -r 's/-dirty[0-9.\-]{18}//g' <<< "${flags}")"
     IFS='-' read -r -a bits <<< "${flags}"
 
     for bit in "${bits[@]}"; do
