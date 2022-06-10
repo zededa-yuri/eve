@@ -22,5 +22,9 @@ config:
     - all
   pid: host
   rootfsPropagation: shared
+  security_opt:
+    - seccomp:unconfined
+  ports:
+    - 2345:2345
 buildArgs:
   - DEV=y
