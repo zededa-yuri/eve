@@ -77,6 +77,10 @@ type AppInfoHandler struct {
 	ctx *zedrouterContext
 }
 
+type PatchesHandler struct {
+	ctx *zedrouterContext
+}
+
 // KubeconfigFileSizeLimitInBytes holds the maximum expected size of Kubeconfig file received from k3s server appInst.
 // Note: KubeconfigFileSizeLimitInBytes should always be < AppInstMetadataResponseSizeLimitInBytes.
 const KubeconfigFileSizeLimitInBytes = 32768 // 32KB
@@ -126,8 +130,10 @@ func createServer4(ctx *zedrouterContext, bridgeIP string, bridgeName string) er
 	mux.Handle("/eve/v1/app/info.json", AppInfoHandler)
 
 	log.Error("Adding /eve/app-patches to servemux")
-	patchesHandler := http.FileServer(http.Dir("/persist/app-patches"))
-	mux.Handle("/eve/app-patches/", patchesHandler)
+	//patchesHandler := http.FileServer(http.Dir("/persist/app-patches"))
+	PatchesHandler := &PatchesHandler{ctx: ctx}
+	mux.Handle("/eve/app-patches/", PatchesHandler)
+	//mux.HandleFunc()
 
 	targetPort := 80
 	subnetStr := "169.254.169.254/32"
@@ -758,4 +764,29 @@ func (hdl AppInfoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resp, _ := json.Marshal(patches)
 	w.WriteHeader(http.StatusOK)
 	w.Write(resp)
+}
+
+func (hdl PatchesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	/* TODO:
+	 * 1. Check if the requester is allowed even to know about this file (e.g. ACL)
+	 * 2. Match the url to the path in /persist
+	 * 3. Serve the file as below
+	 */
+	path := "/persist/patches/deadbeaf.bin"
+
+	f, err := os.Open(path)
+	if err != nil {
+		http.Error(w, r.RequestURI, http.StatusNotFound)
+		return
+	}
+	defer f.Close()
+
+	fi, err := f.Stat()
+	if err != nil {
+		http.Error(w, r.RequestURI, http.StatusNotFound)
+		return
+	}
+	modTime := fi.ModTime()
+
+	http.ServeContent(w, r, path, modTime, f)
 }
