@@ -34,13 +34,13 @@ build: $(APPS) $(APPS1)
 
 
 LDFLAGS=-X=main.Version=$(BUILD_VERSION)
-ifneq ($(DEV_BUILD),y)
+ifneq ($(DEV),y)
 	LDFLAGS+=-s -w
 endif
 LDFLAGS:=-ldflags "$(LDFLAGS)"
 
 GCFLAGS=
-ifeq ($(DEV_BUILD),y)
+ifeq ($(DEV),y)
 	GCFLAGS:=-gcflags=all="-N -l"
 endif
 

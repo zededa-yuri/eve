@@ -23,4 +23,4 @@ config:
   pid: host
   rootfsPropagation: shared
 buildArgs:
-  - DEV_BUILD=y
+  - DEV=y

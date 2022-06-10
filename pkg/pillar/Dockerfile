@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 FROM lfedge/eve-alpine:3a7658b4168bcf40dfbcb15fbae8979d81efb6f1 as build
 
-ARG DEV_BUILD=n
+ARG DEV=n
 
 ENV BUILD_PKGS git gcc linux-headers libc-dev make linux-pam-dev m4 findutils go util-linux make patch wget zfs-dev
 ENV PKGS alpine-baselayout musl-utils libtasn1-progs pciutils yajl xz bash iptables ip6tables iproute2 dhcpcd coreutils dmidecode libbz2 libuuid ipset curl radvd ethtool util-linux e2fsprogs libcrypto1.1 xorriso qemu-img jq e2fsprogs-extra keyutils ca-certificates ip6tables-openrc iptables-openrc ipset-openrc hdparm zfs
@@ -48,11 +48,11 @@ RUN [ -z "$GOARCH" ] || export CC=$(echo /*-cross/bin/*-gcc) ;\
     echo "Running go vet" && go vet ./... && \
     echo "Running go fmt" && ERR=$(gofmt -e -l -s $(find . -name \*.go | grep -v /vendor/)) && \
        if [ -n "$ERR" ] ; then echo "go fmt Failed - ERR: "$ERR ; exit 1 ; fi && \
-    make DEV_BUILD=$DEV_BUILD DISTDIR=/out/opt/zededa/bin build
+    make DEV=$DEV DISTDIR=/out/opt/zededa/bin build
 
 WORKDIR /
 
-RUN if [ ${DEV_BUILD} = "y" ]; then \
+RUN if [ ${DEV} = "y" ]; then \
     CGO_ENABLED=0 go get -ldflags "-s -w -extldflags '-static'" github.com/go-delve/delve/cmd/dlv; \
 fi
 
