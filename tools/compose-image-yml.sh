@@ -17,7 +17,6 @@ process-image-template() {
     IFS='-' read -r -a bits <<< "${flags}"
 
     for bit in "${bits[@]}"; do
-	echo "processing bit ${bit}"
 	case "${bit}" in
 	    dev)
 		yq eval -i '(.services[] | select(.name == "pillar").image) |= "PILLAR_DEV_TAG"' "${out_templ_path}"
@@ -27,13 +26,6 @@ process-image-template() {
 }
 
 main() {
-    # local image_dir="$1"
-    # local base_template="$2"
-    # local out_template="$3"
-    # local eve_version="$4"
-    # local out_templ_path="${image_dir}/${out_template}"
-    # local base_templ_path="${image_dir}/${base_template}"
-
     local base_templ_path="$1"
     local out_templ_path="$2"
     local eve_version="$3"
