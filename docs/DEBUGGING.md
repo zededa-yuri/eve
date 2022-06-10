@@ -2,6 +2,55 @@
 
 This document describes various scenarios and how to debug them. It is a living document to which elements will be added.
 
+## Development Builds
+
+EveOS can be build in "development" mode, by specifing `DEV=y` flag. Currently this affects only pillar package. Specifically pillar is build with debug symbols, and includes [delve](https://github.com/go-delve/delve).
+
+Note that you might need to update your build tools, as this feature requres a backported patch (wich will be deleted once we updated to the latest linuxkit).
+
+```
+rm build-tools/bin/linuxkit
+make build-tools
+```
+
+To build and run a development Eve in virtualized environment:
+```
+make DEV=y pkg/pillar live run
+```
+
+### Using Delve debugger
+
+```
+ssh -L 2348:localhost:2345 -p 2222 root@localhost
+# -L 2348:localhost:2345 - forward host's port 2348 to Eve's port 2345
+# -p 2222 - use port 2222, as qemu forward it to Guest's (in this case EveOS) port 22 (ssh)
+
+eve enter pillar
+/opt/dlv --headless --listen :2345 attach "$(pgrep zedbox)"
+```
+
+In a different termianl
+```
+❯ dlv connect :2348
+Type 'help' for list of commands.
+(dlv) b github.com/lf-edge/eve/pkg/pillar/base.(*LogObject).Functionf
+Breakpoint 1 set at 0xf50db8 for github.com/lf-edge/eve/pkg/pillar/base.(*LogObject).Functionf() /pillar/base/log.go:74
+(dlv) c
+> github.com/lf-edge/eve/pkg/pillar/base.(*LogObject).Functionf() /pillar/base/log.go:74 (hits goroutine(56):1 total:1) (PC: 0xf50db8)
+(dlv) bt
+0  0x0000000000f50db8 in github.com/lf-edge/eve/pkg/pillar/base.(*LogObject).Functionf
+   at /pillar/base/log.go:74
+1  0x0000000001c82067 in github.com/lf-edge/eve/pkg/pillar/utils.WaitForOnboarded
+   at /pillar/utils/waitfor.go:111
+2  0x000000000254f047 in github.com/lf-edge/eve/pkg/pillar/cmd/domainmgr.Run
+   at /pillar/cmd/domainmgr/domainmgr.go:456
+3  0x0000000002bc5225 in main.startAgentAndDone
+   at /pillar/zedbox/zedbox.go:246
+4  0x0000000000ceef01 in runtime.goexit
+   at /usr/lib/go/src/runtime/asm_amd64.s:1371
+(dlv)
+```
+
 ## Live updates of system containers
 
 In order to aid rapid edit/compile/debug cycle EVE's storage-init container can be instructed to dynamically
@@ -236,4 +285,3 @@ It will extract the contents of the `/persist` partition to `./tmp/persist.tgz` 
 
 * `type`: either `live` or `installer`. Defaults to `live`.
 * `arch`: any supported architecture, currently `arm64` or `amd64`. Defaults to `amd64`.
-
